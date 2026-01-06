@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Appbar, ActivityIndicator, Modal, Portal, Card, Title, Paragraph, Button, useTheme } from 'react-native-paper';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../src/context/AuthContext';
 import MapView, { Marker, MapStyleElement } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL, BACKEND_API_URL } from '../config/api'; // Import BACKEND_API_URL
+import { API_URL } from '../../src/config/api';
 
 const customMapStyle: MapStyleElement[] = [
     // ... (map style remains the same)
@@ -35,7 +35,7 @@ export default function HomeScreen() {
 
   const fetchBackendTest = async () => {
     try {
-      const response = await fetch(`${BACKEND_API_URL}/api/test`);
+      const response = await fetch(`${API_URL}/api/test`);
       const data = await response.json();
       if (response.ok) {
         setBackendTestResult(`Backend Test: ${data.message} Solution: ${data.data[0].solution}`);
@@ -56,9 +56,7 @@ export default function HomeScreen() {
       // In a local-only login setup, a token might not exist.
       // The backend should decide how to handle an empty token.
       // For now, we send it, and if it fails, the error is handled gracefully.
-      const response = await fetch(`${BACKEND_API_URL}/api/students`, {
-        headers: { 'x-auth-token': token || '' },
-      });
+      const response = await fetch(`${API_URL}/api/students`);
 
       if (!response.ok) {
         throw new Error('Sunucudan veri alınamadı.');

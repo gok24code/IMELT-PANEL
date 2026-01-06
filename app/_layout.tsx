@@ -1,9 +1,9 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { Text, ActivityIndicator, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
-import { theme } from './config/theme';
+import { theme } from '../src/config/theme';
 
 // This is the root layout of the app that wraps all screens with AuthProvider.
 function RootLayoutNav() {
