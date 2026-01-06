@@ -4,7 +4,7 @@ import { Appbar, ActivityIndicator, Modal, Portal, Card, Title, Paragraph, Butto
 import { useAuth } from '../context/AuthContext';
 import MapView, { Marker, MapStyleElement } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, BACKEND_API_URL } from '../config/api'; // Import BACKEND_API_URL
 
 const customMapStyle: MapStyleElement[] = [
     // ... (map style remains the same)
@@ -26,10 +26,27 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [backendTestResult, setBackendTestResult] = useState<string | null>(null); // New state for backend test
 
   useEffect(() => {
     fetchStudents();
+    fetchBackendTest(); // Call the new fetch function
   }, []);
+
+  const fetchBackendTest = async () => {
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/api/test`);
+      const data = await response.json();
+      if (response.ok) {
+        setBackendTestResult(`Backend Test: ${data.message} Solution: ${data.data[0].solution}`);
+      } else {
+        setBackendTestResult(`Backend Test Error: ${data.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Error fetching backend test:', err);
+      setBackendTestResult('Backend Test Failed: Could not connect to server.');
+    }
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -39,7 +56,7 @@ export default function HomeScreen() {
       // In a local-only login setup, a token might not exist.
       // The backend should decide how to handle an empty token.
       // For now, we send it, and if it fails, the error is handled gracefully.
-      const response = await fetch(`${API_BASE_URL}/api/students`, {
+      const response = await fetch(`${BACKEND_API_URL}/api/students`, {
         headers: { 'x-auth-token': token || '' },
       });
 
@@ -78,6 +95,12 @@ export default function HomeScreen() {
         <Appbar.Action icon="logout" onPress={signOut} />
       </Appbar.Header>
 
+      {backendTestResult && (
+        <View style={styles.backendTestContainer}>
+          <Text style={styles.backendTestText}>{backendTestResult}</Text>
+        </View>
+      )}
+
       <FlatList
         data={students}
         keyExtractor={(item) => item.id.toString()}
@@ -89,7 +112,7 @@ export default function HomeScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyListText}>
-              Öğrenci Bulunamadı.
+              Öğrenci Bilgisi Bulunmuyor
             </Text>
           </View>
         }
@@ -183,5 +206,16 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  backendTestContainer: { // New style for backend test result
+    padding: 10,
+    backgroundColor: 'lightblue',
+    marginHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  backendTestText: { // New style for backend test result text
+    color: 'black',
+    textAlign: 'center',
   },
 });
